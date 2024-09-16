@@ -11,15 +11,20 @@
     "lint": "eslint .",
     "test": "glob -c \"tsx --test --test-reporter spec \" \"./tests/**/*.spec.ts\"",
     "migrate:up": "tsx src/infrastructure/kysely/cli/migrate-up.ts",
-    "migrate:down": "tsx src/infrastructure/kysely/cli/migrate-down.ts"
+    "migrate:down": "tsx src/infrastructure/kysely/cli/migrate-down.ts",
+    "generate:user": "openapi typegen https://wheelz-user.zcorp.ovh/openapi.json > src/types/user.d.ts",
+    "generate:all": "npm run generate:user"
   },
   "dependencies": {
     "@hono/node-server": "^1.11.2",
+    "axios": "^1.7.7",
     "dotenv": "^16.4.5",
     "hono": "^4.4.3",
     "kysely": "^0.27.4",
     "mysql2": "^3.11.0",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "openapi-client-axios": "^7.5.5"
+
   },
   "devDependencies": {
     "@swc/core": "^1.5.25",

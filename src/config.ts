@@ -5,7 +5,6 @@ dotenv.config()
 
 const configSchema = z.object({
   PORT: z.coerce.number().default(3000),
-  HOST: z.string().default('localhost'),
   JWT_SECRET: z.string(),
   DB_HOST: z.string().default('localhost'),
   DB_PORT: z.coerce.number().default(3306),

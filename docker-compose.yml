@@ -4,7 +4,7 @@ services:
     image: mysql
     restart: always
     ports:
-      - '${DB_PORT}:3306'
+      - '3306'
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
@@ -12,6 +12,33 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
       - wheelz-auth-service-local-volume:/var/lib/mysql
+    networks:
+      - auth-services
+
+  app:
+    build:
+      context: .
+      target: development
+    develop:
+      watch:
+        - path: ./src
+          target: /app/src
+          action: sync
+        - path: .env
+          target: /app/.env
+          action: sync+restart
+        - path: package.json
+          action: rebuild
+        - path: package-lock.json
+          action: rebuild
+    ports:
+      - '${PORT}:${PORT}'
+    networks:
+      - auth-services
+
 
 volumes:
   wheelz-auth-service-local-volume:
+
+networks:
+  auth-services:

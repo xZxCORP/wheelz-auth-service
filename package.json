@@ -19,16 +19,17 @@
   "dependencies": {
     "@hono/node-server": "^1.11.2",
     "axios": "^1.7.7",
+    "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.5",
     "hono": "^4.4.3",
     "kysely": "^0.27.4",
     "mysql2": "^3.11.0",
-    "zod": "^3.23.8",
-    "openapi-client-axios": "^7.5.5"
-
+    "openapi-client-axios": "^7.5.5",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@swc/core": "^1.5.25",
+    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.14.1",
     "@zcorp/eslint-config": "^1.0.2",
     "@zcorp/prettier-config": "^1.0.2",

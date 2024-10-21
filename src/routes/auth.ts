@@ -1,76 +1,95 @@
-import { Hono } from 'hono'
 import { AuthService } from '../services/auth.js'
-import { sign } from 'hono/jwt'
-import { config } from '../config.js'
-import { JWTPayload } from 'hono/utils/jwt/types'
 import registerSchema from '../schemas/authentification/register.js'
-import { UserExternalService } from '../services/user-external-service.js'
+import { userClient } from '../services/user-external-service.js'
 import bcrypt from 'bcryptjs';
 import loginSchema from '../schemas/authentification/login.js'
-import { HTTPException } from 'hono/http-exception'
+
+import { authenticationContract } from '@zcorp/wheelz-contracts';
+import { server } from '../server.js';
+import { app } from '../app.js';
 
 const SALT_ROUND = 10
-
-const userExternalService = new UserExternalService()
 const authService = new AuthService()
-export const authRouter = new Hono()
 
-authRouter.post('/register', async (c) => {
-    const parseResult = registerSchema.safeParse(await c.req.json());
-    if (!parseResult.success) {
-      throw new HTTPException(400, {message: 'Wrong body'})
+export const authRouter = server.router(authenticationContract, {
+    async register(input, reply) {
+        const parseResult = registerSchema.safeParse(input.body);
+        if (!parseResult.success) {
+            return reply.status(400).send({ message: 'Wrong body' });
+        }
+
+        const body = parseResult.data;
+
+        const user = await userClient.users.createUser({
+            body: {
+                firstname: body.firstname,
+                lastname: body.lastname,
+                email: body.email
+            }
+        })
+
+        const salt = bcrypt.genSaltSync(SALT_ROUND);
+        const hash = bcrypt.hashSync(body.password, salt);
+
+        await authService.create({
+            user_id: user.body.id,
+            salt: salt,
+            password: hash
+        });
+
+        return {
+        status: 201,
+        body: {
+            data: {
+            id: user.body.id,
+            email: user.body.email,
+            firstname: user.body.firstname,
+            lastname: user.body.lastname,
+            createdAt: user.body.created_at,
+            },
+        },
+    }},
+    async login(input, reply) {
+        const parseResult = loginSchema.safeParse(input.body);
+        if (!parseResult.success) {
+            return reply.status(400).send({ message: 'Wrong Body'});
+        }
+
+        const body = parseResult.data;
+
+        const user = await userClient.users.getUsers({
+            query:{
+                email: body.email
+            }
+        });
+        if(!user) {
+            return reply.status(401).send({ message: 'Wrong password or email' });
+        };
+
+        const authorization = await authService.show(user.id);
+        if (!authorization) {
+            return reply.status(400).send({ message: 'No Authorization found'});
+        }
+
+        const match = await bcrypt.compare(body.password, authorization.password);
+        if(!match) {
+            return reply.status(401).send({ message: 'Wrong password or email' });
+        }
+
+        const payload = {
+            userId: user.id
+        }
+
+        const token = app.jwt.sign(payload, {expiresIn: 24})
+
+
+        return {
+            status: 201,
+            body: {
+                data: {
+                    token: token
+                }
+            }
+        }
     }
-
-    const body = parseResult.data;
-
-    const user = await userExternalService.create({
-        firstname: body.firstname,
-        lastname: body.lastname,
-        email: body.email
-    });
-
-    const salt = bcrypt.genSaltSync(SALT_ROUND);
-    const hash = bcrypt.hashSync(body.password, salt);
-
-    await authService.create({
-        user_id: user.data.id,
-        salt: salt,
-        password: hash
-    });
-
-    return c.json({ data: user.data });
 });
-
-authRouter.post('/login', async(c) => {
-    const parseResult = loginSchema.safeParse(await c.req.json());
-    if (!parseResult.success) {
-      throw new HTTPException(400, {message: 'Wrong body'})
-    }
-
-    const body = parseResult.data;
-    const secret = config.JWT_SECRET;
-
-    const userId: number = await userExternalService.getByEmail(body.email);
-    if(!userId) {
-        throw new HTTPException(401, {message: 'Wrong password or email'});
-    }
-
-    const authorization = await authService.show(userId);
-    if (!authorization) {
-        throw new HTTPException(400, {message: 'No Authorization found'});
-    }
-
-    const match = await bcrypt.compare(body.password, authorization.password);
-    if(!match) {
-        throw new HTTPException(401, {message: 'Wrong password or email'});
-    }
-
-    const payload: JWTPayload = {
-        exp: Math.floor(Date.now() / 1000) + 3600 * 24, // Expired in 24H
-        userId: userId
-    }
-
-    const token = await sign(payload, secret);
-
-    return c.json({data: token});
-})

@@ -1,19 +1,44 @@
-import { Context, Hono } from 'hono'
-import { logger } from 'hono/logger'
-
-import { helloRouter } from './routes/hello.js'
 import { authRouter } from './routes/auth.js'
-import { HTTPException } from 'hono/http-exception'
 
-export const app = new Hono()
-app.use(logger())
+import fastifySwagger from '@fastify/swagger';
+import fastifySwaggerUI from '@fastify/swagger-ui';
+import { authenticationContract} from '@zcorp/wheelz-contracts';
+import Fastify from 'fastify';
 
-app.onError((error: Error, c: Context) => {
-    console.error('error', error)
-    return error instanceof HTTPException
-      ? c.json({ message: error.message, data: error.cause }, error.status)
-      : c.json({ message: 'Server error' }, 500)
-})
+import jwt from '@fastify/jwt'
 
-app.route('/hello', helloRouter)
-app.route('/', authRouter)
+import { openApiDocument } from './open-api.js';
+import { server } from './server.js';
+import { config } from './config.js';
+export const app = Fastify({
+  logger: {
+    transport: {
+      target: 'pino-pretty',
+      options: {
+        translateTime: 'HH:MM:ss Z',
+        ignore: 'pid,hostname',
+      },
+    },
+  },
+});
+
+app.setErrorHandler((error, _, reply) => {
+  reply.status(error.statusCode ?? 500).send({ message: error.message, data: error.cause });
+});
+
+app.register(jwt, {
+  secret: config.JWT_SECRET
+});
+
+server.registerRouter(authenticationContract, authRouter, app, {
+  requestValidationErrorHandler(error, _, reply) {
+    return reply.status(400).send({ message: 'Validation failed', data: error.body?.issues });
+  },
+});
+app
+  .register(fastifySwagger, {
+    transformObject: () => openApiDocument,
+  })
+  .register(fastifySwaggerUI, {
+    routePrefix: '/ui',
+  });

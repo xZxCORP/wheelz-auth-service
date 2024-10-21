@@ -15,7 +15,7 @@ services:
       - auth-services
       - wheelz-app
 
-  app:
+  auth_api:
     build:
       context: .
       target: development

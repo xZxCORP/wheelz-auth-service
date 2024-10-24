@@ -21,7 +21,7 @@ COPY --from=builder /app/dist ./dist
 COPY package.json ./
 USER hono
 EXPOSE 3000
-CMD ["node", "dist/src/index.js"]
+CMD ["sh", "-c", "node dist/src/infrastructure/kysely/cli/migrate-up.js -- node dist/src/index.js"]
 
 FROM base AS development
 RUN apk add --no-cache bash

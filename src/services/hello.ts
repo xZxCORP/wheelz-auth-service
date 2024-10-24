@@ -1,5 +1,5 @@
 export class HelloService {
   hello() {
-    return 'world'
+    return 'world';
   }
 }

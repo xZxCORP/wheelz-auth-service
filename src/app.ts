@@ -1,3 +1,4 @@
+import cors from '@fastify/cors';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUI from '@fastify/swagger-ui';
 import { authenticationContract } from '@zcorp/wheelz-contracts';
@@ -20,6 +21,9 @@ export const app = Fastify({
 
 app.setErrorHandler((error, _, reply) => {
   reply.status(error.statusCode ?? 500).send({ message: error.message, data: error.cause });
+});
+app.register(cors, {
+  origin: '*',
 });
 
 server.registerRouter(authenticationContract.authentication, authRouter, app, {

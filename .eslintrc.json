@@ -1,3 +1,7 @@
 {
-  "extends": ["@zcorp/eslint-config/app"]
+  "extends": ["@zcorp/eslint-config/app"],
+  "rules": {
+    "@typescript-eslint/consistent-type-imports": "error",
+    "unicorn/no-null":"off"
+  }
 }

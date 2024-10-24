@@ -1,0 +1,47 @@
+services:
+  auth_db:
+    image: mysql
+    restart: always
+    ports:
+      - '3307:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - wheelz-auth-service-local-volume:/var/lib/mysql
+    networks:
+      - auth-services
+      - wheelz-app
+
+  auth_api:
+    build:
+      context: .
+      target: development
+    develop:
+      watch:
+        - path: ./src
+          target: /app/src
+          action: sync
+        - path: .env
+          target: /app/.env
+          action: sync+restart
+        - path: package.json
+          action: rebuild
+        - path: package-lock.json
+          action: rebuild
+    ports:
+      - '${PORT}:${PORT}'
+    networks:
+      - auth-services
+      - wheelz-app
+
+
+volumes:
+  wheelz-auth-service-local-volume:
+
+networks:
+  auth-services:
+  wheelz-app:
+    external: true

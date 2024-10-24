@@ -1,14 +1,16 @@
 name: Build and Deploy Docker Image
 
 on:
-  workflow_run:
-    workflows: ["Lint and Test"]
-    types:
-      - completed
+  push:
+    branches:
+      - main
 
 jobs:
+  lint-and-test:
+    uses: ./.github/workflows/lint-test.yml
+
   build-and-push:
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.ref == 'refs/heads/main' }}
+    needs: lint-and-test
     runs-on: [self-hosted]
 
     steps:
@@ -37,8 +39,17 @@ jobs:
         with:
           context: .
           push: true
+          target: runner
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/${{ vars.IMAGE_NAME }}:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
       - name: Trigger webhook
         uses: fjogeleit/http-request-action@v1
         with:

@@ -33,6 +33,10 @@ export const authRouter = server.router(authenticationContract.authentication, {
       salt: salt,
       password: hash,
     });
+
+
+
+
     if (!createdUser) {
       return {
         status: 500,

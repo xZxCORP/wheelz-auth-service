@@ -2,6 +2,8 @@ import type { ColumnType, Generated, Insertable, Selectable, Updateable } from '
 
 export interface Database {
   user_authentification: UserAuthorizationTable;
+  role: RoleTable,
+  user_role: UserRoleTable,
 }
 
 export interface UserAuthorizationTable {

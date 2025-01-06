@@ -6,11 +6,14 @@ import { config } from '../config.js';
 import { server } from '../server.js';
 import { AuthService } from '../services/auth.js';
 import { userClient } from '../services/user-external-service.js';
+import { RoleService } from '../services/role.js';
 interface JwtPayload {
   userId: number;
+  roles: string[]
 }
 const SALT_ROUND = 10;
 const authService = new AuthService();
+const roleService = new RoleService();
 
 export const authRouter = server.router(authenticationContract.authentication, {
   async register(input) {
@@ -25,6 +28,9 @@ export const authRouter = server.router(authenticationContract.authentication, {
       return userResponse;
     }
 
+    const userRole = await roleService.getUserDefaultRole();
+    await roleService.setRole(userResponse.body.data.id, userRole.id);
+
     const salt = bcrypt.genSaltSync(SALT_ROUND);
     const hash = bcrypt.hashSync(input.body.password, salt);
 
@@ -33,9 +39,6 @@ export const authRouter = server.router(authenticationContract.authentication, {
       salt: salt,
       password: hash,
     });
-
-
-
 
     if (!createdUser) {
       return {
@@ -95,8 +98,11 @@ export const authRouter = server.router(authenticationContract.authentication, {
       };
     }
 
+    const roles = await roleService.getUserRoles(user.id);
+
     const payload: JwtPayload = {
       userId: user.id,
+      roles: roles
     };
 
     const token = jwt.sign(payload, config.JWT_SECRET, {
@@ -115,7 +121,10 @@ export const authRouter = server.router(authenticationContract.authentication, {
       const response = jwt.verify(input.body.token, config.JWT_SECRET) as JwtPayload;
       return {
         status: 200,
-        body: response.userId,
+        body: {
+          userId: response.userId,
+          roles: response.roles
+        }
       };
     } catch {
       return {

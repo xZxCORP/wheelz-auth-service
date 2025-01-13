@@ -103,7 +103,7 @@ export const authRouter = server.router(authenticationContract.authentication, {
       return {
         status: 401,
         body: {
-          message: 'No user_role with this is id'
+          message: 'No user_role with this is id',
         },
       };
     }

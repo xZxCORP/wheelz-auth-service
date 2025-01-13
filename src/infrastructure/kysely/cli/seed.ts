@@ -1,9 +1,15 @@
-import { database, ensureDatabaseExists, migrateToLatest } from '../database.js';
+import {
+  ADMIN_ROLE,
+  database,
+  ensureDatabaseExists,
+  migrateToLatest,
+  USER_ROLE,
+} from '../database.js';
 
 const seedRoles = async () => {
   console.log('Seeding roles...');
 
-  const roles = ['user', 'admin'];
+  const roles = [USER_ROLE, ADMIN_ROLE];
 
   for (const roleName of roles) {
     const existingRole = await database

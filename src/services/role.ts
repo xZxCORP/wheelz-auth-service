@@ -1,4 +1,4 @@
-import { database } from '../infrastructure/kysely/database.js';
+import { database, USER_ROLE } from '../infrastructure/kysely/database.js';
 import type { UserRole } from '../infrastructure/kysely/types.js';
 
 export class RoleService {
@@ -78,7 +78,7 @@ export class RoleService {
       const result = await database
         .selectFrom('role')
         .selectAll()
-        .where('name', '=', 'user')
+        .where('name', '=', USER_ROLE)
         .executeTakeFirst();
 
       if (!result) {

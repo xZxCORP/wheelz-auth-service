@@ -21,6 +21,6 @@ export const up = async (database: Kysely<Database>): Promise<void> => {
 };
 
 export const down = async (database: Kysely<Database>): Promise<void> => {
-  await database.schema.dropTable('user_authorization').execute();
-  await database.schema.dropTable('authorization').execute();
+  await database.schema.dropTable('role').execute();
+  await database.schema.dropTable('user_role').execute();
 };

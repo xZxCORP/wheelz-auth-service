@@ -80,3 +80,6 @@ export const migrateToLatest = async (destroy: boolean = true) => {
     await database.destroy();
   }
 };
+
+export const USER_ROLE = 'user';
+export const ADMIN_ROLE = 'admin';

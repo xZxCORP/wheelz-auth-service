@@ -99,6 +99,14 @@ export const authRouter = server.router(authenticationContract.authentication, {
     }
 
     const roles = await roleService.getUserRoles(user.id);
+    if (!roles) {
+      return {
+        status: 401,
+        body: {
+          message: 'No user_role with this is id'
+        },
+      };
+    }
 
     const payload: JwtPayload = {
       userId: user.id,

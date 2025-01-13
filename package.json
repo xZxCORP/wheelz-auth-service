@@ -6,7 +6,7 @@
     "node": ">= 20.11.0"
   },
   "scripts": {
-    "start:docker": "npm run migrate:up && npm run dev",
+    "start:docker": "npm run seed && npm run dev",
     "start:docker:prod": "node dist/infrastructure/kysely/cli/migrate-up.js && node dist/index.js",
     "dev": "tsx src/index.ts",
     "build": "tsc",
@@ -14,6 +14,7 @@
     "test": "glob -c \"tsx --test --test-reporter spec \" \"./tests/**/*.spec.ts\"",
     "migrate:up": "tsx src/infrastructure/kysely/cli/migrate-up.ts",
     "migrate:down": "tsx src/infrastructure/kysely/cli/migrate-down.ts",
+    "seed": "tsx src/infrastructure/kysely/cli/seed.ts",
     "generate:user": "openapi typegen https://wheelz-user.zcorp.ovh/openapi.json > src/types/user.d.ts",
     "generate:all": "npm run generate:user"
   },

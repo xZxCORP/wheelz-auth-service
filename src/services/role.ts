@@ -1,4 +1,5 @@
 import { database } from "../infrastructure/kysely/database.js";
+import type { UserRole } from "../infrastructure/kysely/types.js";
 
 export class RoleService {
     async index() {
@@ -49,8 +50,19 @@ export class RoleService {
           }
     }
 
-    async getUserRoles(userId: number) {
+    async getUserRoles(userId: number): Promise<undefined | String[]> {
       try {
+
+        const user_role: UserRole | undefined = await database
+          .selectFrom('user_role')
+          .selectAll()
+          .where('user_role.user_id', '=', userId)
+          .executeTakeFirst();
+
+        if (!user_role) {
+          return undefined;
+        }
+
         const roles = await database
           .selectFrom('user_role')
           .innerJoin('role', 'user_role.role_id', 'role.id')

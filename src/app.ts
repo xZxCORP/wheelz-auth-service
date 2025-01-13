@@ -6,8 +6,8 @@ import Fastify from 'fastify';
 
 import { openApiDocument } from './open-api.js';
 import { authRouter } from './routes/auth.js';
-import { server } from './server.js';
 import { roleRouter } from './routes/role.js';
+import { server } from './server.js';
 export const app = Fastify({
   logger: {
     transport: {

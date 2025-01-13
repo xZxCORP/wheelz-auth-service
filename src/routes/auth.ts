@@ -5,11 +5,11 @@ import jwt from 'jsonwebtoken';
 import { config } from '../config.js';
 import { server } from '../server.js';
 import { AuthService } from '../services/auth.js';
-import { userClient } from '../services/user-external-service.js';
 import { RoleService } from '../services/role.js';
+import { userClient } from '../services/user-external-service.js';
 interface JwtPayload {
   userId: number;
-  roles: string[]
+  roles: string[];
 }
 const SALT_ROUND = 10;
 const authService = new AuthService();
@@ -102,7 +102,7 @@ export const authRouter = server.router(authenticationContract.authentication, {
 
     const payload: JwtPayload = {
       userId: user.id,
-      roles: roles
+      roles: roles,
     };
 
     const token = jwt.sign(payload, config.JWT_SECRET, {
@@ -123,8 +123,8 @@ export const authRouter = server.router(authenticationContract.authentication, {
         status: 200,
         body: {
           userId: response.userId,
-          roles: response.roles
-        }
+          roles: response.roles,
+        },
       };
     } catch {
       return {

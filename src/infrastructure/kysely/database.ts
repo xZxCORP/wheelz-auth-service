@@ -1,11 +1,11 @@
-import chalk from 'chalk';
-import { Kysely, MysqlDialect } from 'kysely';
-import mysql2 from 'mysql2';
-import mysql2Promise from 'mysql2/promise';
-import { FileMigrationProvider, Migrator } from 'kysely';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 
+import chalk from 'chalk';
+import { Kysely, MysqlDialect } from 'kysely';
+import { FileMigrationProvider, Migrator } from 'kysely';
+import mysql2 from 'mysql2';
+import mysql2Promise from 'mysql2/promise';
 
 import { config } from '../../config.js';
 import type { Database } from './types.js';
@@ -47,9 +47,7 @@ export const ensureDatabaseExists = async () => {
   }
 };
 
-
-export const migrateToLatest = async (destroy: boolean = true ) => {
-
+export const migrateToLatest = async (destroy: boolean = true) => {
   const migrator = new Migrator({
     db: database,
     provider: new FileMigrationProvider({

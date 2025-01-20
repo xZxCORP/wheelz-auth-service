@@ -1,11 +1,12 @@
 import cors from '@fastify/cors';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUI from '@fastify/swagger-ui';
-import { authenticationContract } from '@zcorp/wheelz-contracts';
+import { authenticationContract, roleContract } from '@zcorp/wheelz-contracts';
 import Fastify from 'fastify';
 
 import { openApiDocument } from './open-api.js';
 import { authRouter } from './routes/auth.js';
+import { roleRouter } from './routes/role.js';
 import { server } from './server.js';
 export const app = Fastify({
   logger: {
@@ -31,6 +32,13 @@ server.registerRouter(authenticationContract.authentication, authRouter, app, {
     return reply.status(400).send({ message: 'Validation failed', data: error.body?.issues });
   },
 });
+
+server.registerRouter(roleContract.contract, roleRouter, app, {
+  requestValidationErrorHandler(error, _, reply) {
+    return reply.status(400).send({ message: 'Validation failed', data: error.body?.issues });
+  },
+});
+
 app
   .register(fastifySwagger, {
     transformObject: () => openApiDocument,

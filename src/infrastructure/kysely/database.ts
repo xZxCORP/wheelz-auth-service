@@ -55,6 +55,7 @@ export const migrateToLatest = async (destroy: boolean = true) => {
       path,
       migrationFolder: path.join(import.meta.dirname, './migrations'),
     }),
+    allowUnorderedMigrations: true,
   });
 
   const { error, results } = await migrator.migrateToLatest();

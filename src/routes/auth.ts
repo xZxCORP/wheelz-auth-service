@@ -68,7 +68,7 @@ export const authRouter = server.router(authenticationContract.authentication, {
         },
       };
     }
-    const user = userResponse.body.total ? userResponse.body.items[0] : undefined;
+    const user = userResponse.body.meta.total ? userResponse.body.items[0] : undefined;
     if (!user) {
       return {
         status: 401,

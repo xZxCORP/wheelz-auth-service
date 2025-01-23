@@ -23,18 +23,17 @@ export class AuthService {
     const result = await database
       .insertInto('user_authentification')
       .values({ ...user_authentification })
+      .returning('id')
       .executeTakeFirst();
 
-    if (!result || !result.insertId) {
+    if (!result || !result.id) {
       return null;
     }
-
-    const insertId = Number(result.insertId);
 
     const authorization = await database
       .selectFrom('user_authentification')
       .selectAll()
-      .where('id', '=', insertId)
+      .where('id', '=', result.id)
       .executeTakeFirstOrThrow();
 
     return authorization;

@@ -1,10 +1,16 @@
-import { authenticationContract } from '@zcorp/wheelz-contracts';
+import {
+  authenticationContract,
+  type CompanyCreateWithOwnerId,
+  type User,
+  type UserCreate,
+} from '@zcorp/wheelz-contracts';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 import { config } from '../config.js';
 import { server } from '../server.js';
 import { AuthService } from '../services/auth.js';
+import { companyClient } from '../services/company-external-service.js';
 import { RoleService } from '../services/role.js';
 import { userClient } from '../services/user-external-service.js';
 interface JwtPayload {
@@ -17,41 +23,35 @@ const roleService = new RoleService();
 
 export const authRouter = server.router(authenticationContract.authentication, {
   async register(input) {
-    const userResponse = await userClient.users.createUser({
-      body: {
-        firstname: input.body.firstname,
-        lastname: input.body.lastname,
-        email: input.body.email,
-      },
+    const createdUser = await registerUser({
+      lastname: input.body.lastname,
+      firstname: input.body.firstname,
+      email: input.body.email,
     });
-    if (userResponse.status !== 201) {
-      return userResponse;
-    }
-
-    const userRole = await roleService.getUserDefaultRole();
-    await roleService.setRole(userResponse.body.data.id, userRole.id);
-
-    const salt = bcrypt.genSaltSync(SALT_ROUND);
-    const hash = bcrypt.hashSync(input.body.password, salt);
-
-    const createdUser = await authService.create({
-      user_id: userResponse.body.data.id,
-      salt: salt,
-      password: hash,
-    });
-
     if (!createdUser) {
       return {
         status: 500,
         body: {
-          message: 'Something went wrong',
+          message: 'Erreur serveur',
+        },
+      };
+    }
+
+    const response = await createAuth(input.body.password, createdUser.id);
+    if (!response) {
+      return {
+        status: 500,
+        body: {
+          message: 'Erreur serveur',
         },
       };
     }
 
     return {
       status: 201,
-      body: userResponse.body,
+      body: {
+        data: createdUser,
+      },
     };
   },
   async login(input) {
@@ -143,4 +143,82 @@ export const authRouter = server.router(authenticationContract.authentication, {
       };
     }
   },
+  async registerAsCompany(input) {
+    const createdUser = await registerUser({
+      lastname: input.body.owner.lastname,
+      firstname: input.body.owner.firstname,
+      email: input.body.owner.email,
+    });
+    if (!createdUser) {
+      return {
+        status: 500,
+        body: {
+          message: 'Erreur serveur',
+        },
+      };
+    }
+
+    const response = await createAuth(input.body.owner.password, createdUser.id);
+    if (!response) {
+      return {
+        status: 500,
+        body: {
+          message: 'Erreur serveur',
+        },
+      };
+    }
+
+    const companyParameters: CompanyCreateWithOwnerId = {
+      ...input.body.company,
+      ownerId: createdUser.id,
+    };
+
+    const companyResponse = await companyClient.contract.create({ body: companyParameters });
+    if (companyResponse.status !== 201) {
+      return {
+        status: 500,
+        body: {
+          message: 'Erreur serveur',
+        },
+      };
+    }
+
+    return companyResponse;
+  },
 });
+
+const registerUser = async (userParameters: UserCreate): Promise<User | null> => {
+  const userResponse = await userClient.users.createUser({
+    body: {
+      firstname: userParameters.firstname,
+      lastname: userParameters.lastname,
+      email: userParameters.email,
+    },
+  });
+  if (userResponse.status !== 201) {
+    return null;
+  }
+
+  const userRole = await roleService.getUserDefaultRole();
+  await roleService.setRole(userResponse.body.data.id, userRole.id);
+  return userResponse.body.data;
+};
+
+const createAuth = async (password: string, userId: number): Promise<true | false> => {
+  const salt = bcrypt.genSaltSync(SALT_ROUND);
+  const hash = bcrypt.hashSync(password, salt);
+
+  const createdAuthUser = await authService.create({
+    user_id: userId,
+    salt: salt,
+    password: hash,
+  });
+
+  if (!createdAuthUser) {
+    await userClient.users.deleteUser({ params: { id: String(userId) } });
+
+    return false;
+  }
+
+  return true;
+};

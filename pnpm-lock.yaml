@@ -30,8 +30,8 @@ importers:
         specifier: latest
         version: 1.0.40
       '@zcorp/wheelz-contracts':
-        specifier: latest
-        version: 1.1.9(@types/node@20.17.16)
+        specifier: ^1.1
+        version: 1.1.12(@types/node@20.17.16)
       axios:
         specifier: ^1.7.9
         version: 1.7.9
@@ -550,8 +550,8 @@ packages:
   '@zcorp/tsconfig@1.0.11':
     resolution: {integrity: sha512-Fpv2qGqdedztjMnA7MY1vTV9L28/pXZgZFdXb/oTJYc3VUxpL2SS6EcvALvhEO/xqhfiqn3bQ2nV1tH7n+fkeg==}
 
-  '@zcorp/wheelz-contracts@1.1.9':
-    resolution: {integrity: sha512-YZybUZRZZYAM88Ie+kXS5nUTEeAnRYGXlffhlse9Ln9fxBWXxsNUaM+1CCyv5sZUu9vUDWV9pRFvstCczCn7dA==}
+  '@zcorp/wheelz-contracts@1.1.12':
+    resolution: {integrity: sha512-xKuF1hQmZ3PpxEsaKS3NyBtgm96FaB3ralWe398/6GgR4KNKI++6c53Hqwdcba+pPR6vc6dNVWdxG7yv8xbyBw==}
 
   abort-controller@3.0.0:
     resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
@@ -2606,7 +2606,7 @@ snapshots:
 
   '@zcorp/tsconfig@1.0.11': {}
 
-  '@zcorp/wheelz-contracts@1.1.9(@types/node@20.17.16)':
+  '@zcorp/wheelz-contracts@1.1.12(@types/node@20.17.16)':
     dependencies:
       '@ts-rest/core': 3.51.0(@types/node@20.17.16)(zod@3.24.1)
       zod: 3.24.1

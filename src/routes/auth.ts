@@ -28,7 +28,7 @@ export const authRouter = server.router(authenticationContract.authentication, {
       lastname: input.body.lastname,
       firstname: input.body.firstname,
       email: input.body.email,
-    } );
+    });
     if (!createdUser) {
       return {
         status: 500,
@@ -110,19 +110,14 @@ export const authRouter = server.router(authenticationContract.authentication, {
     }
 
     const company = await companyClient.contract.show({
-      params: {id: String(user.company?.id) }
+      params: { id: String(user.company?.id) },
     });
 
     const payload: JwtPayload = {
       userId: user.id,
       roles: roles,
-      companyId: company.status === 200 ? company.body.data.id : undefined
+      companyId: company.status === 200 ? company.body.data.id : undefined,
     };
-
-
-
-    console.log(String(user.company?.id));
-    console.log(payload);
 
     const token = jwt.sign(payload, config.JWT_SECRET, {
       expiresIn: '1d',

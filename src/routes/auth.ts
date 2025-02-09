@@ -16,6 +16,7 @@ import { userClient } from '../services/user-external-service.js';
 interface JwtPayload {
   userId: number;
   roles: string[];
+  companyId: number | undefined;
 }
 const SALT_ROUND = 10;
 const authService = new AuthService();
@@ -27,7 +28,7 @@ export const authRouter = server.router(authenticationContract.authentication, {
       lastname: input.body.lastname,
       firstname: input.body.firstname,
       email: input.body.email,
-    });
+    } );
     if (!createdUser) {
       return {
         status: 500,
@@ -108,10 +109,20 @@ export const authRouter = server.router(authenticationContract.authentication, {
       };
     }
 
+    const company = await companyClient.contract.show({
+      params: {id: String(user.company?.id) }
+    });
+
     const payload: JwtPayload = {
       userId: user.id,
       roles: roles,
+      companyId: company.status === 200 ? company.body.data.id : undefined
     };
+
+
+
+    console.log(String(user.company?.id));
+    console.log(payload);
 
     const token = jwt.sign(payload, config.JWT_SECRET, {
       expiresIn: '1d',
@@ -132,6 +143,7 @@ export const authRouter = server.router(authenticationContract.authentication, {
         body: {
           userId: response.userId,
           roles: response.roles,
+          companyId: response.companyId,
         },
       };
     } catch {

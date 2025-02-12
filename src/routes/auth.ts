@@ -56,7 +56,7 @@ export const authRouter = server.router(authenticationContract.authentication, {
     };
   },
   async login(input) {
-    const userResponse = await userClient.users.getUsers({
+    const userResponse = await userClient.users.getPaginatedUsers({
       query: {
         email: input.body.email,
       },

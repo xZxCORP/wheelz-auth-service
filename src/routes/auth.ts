@@ -16,6 +16,7 @@ import { userClient } from '../services/user-external-service.js';
 interface JwtPayload {
   userId: number;
   roles: string[];
+  companyId: number | undefined;
 }
 const SALT_ROUND = 10;
 const authService = new AuthService();
@@ -55,7 +56,7 @@ export const authRouter = server.router(authenticationContract.authentication, {
     };
   },
   async login(input) {
-    const userResponse = await userClient.users.getUsers({
+    const userResponse = await userClient.users.getPaginatedUsers({
       query: {
         email: input.body.email,
       },
@@ -108,9 +109,14 @@ export const authRouter = server.router(authenticationContract.authentication, {
       };
     }
 
+    const company = await companyClient.contract.show({
+      params: { id: String(user.company?.id) },
+    });
+
     const payload: JwtPayload = {
       userId: user.id,
       roles: roles,
+      companyId: company.status === 200 ? company.body.data.id : undefined,
     };
 
     const token = jwt.sign(payload, config.JWT_SECRET, {
@@ -132,6 +138,7 @@ export const authRouter = server.router(authenticationContract.authentication, {
         body: {
           userId: response.userId,
           roles: response.roles,
+          companyId: response.companyId,
         },
       };
     } catch {

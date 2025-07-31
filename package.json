@@ -11,7 +11,6 @@
     "dev": "tsx src/index.ts",
     "build": "tsc",
     "lint": "eslint . --fix",
-    "test": "glob -c \"tsx --test --test-reporter spec \" \"./tests/**/*.spec.ts\"",
     "migrate:up": "tsx src/infrastructure/kysely/cli/migrate-up.ts",
     "migrate:down": "tsx src/infrastructure/kysely/cli/migrate-down.ts",
     "seed": "tsx src/infrastructure/kysely/cli/seed.ts",

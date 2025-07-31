@@ -6,6 +6,7 @@ import Fastify from 'fastify';
 
 import { openApiDocument } from './open-api.js';
 import { authRouter } from './routes/auth.js';
+import { healthRouter } from './routes/health.js';
 import { roleRouter } from './routes/role.js';
 import { server } from './server.js';
 export const app = Fastify({
@@ -38,6 +39,7 @@ server.registerRouter(roleContract.contract, roleRouter, app, {
     return reply.status(400).send({ message: 'Validation failed', data: error.body?.issues });
   },
 });
+server.registerRouter(authenticationContract.health, healthRouter, app);
 
 app
   .register(fastifySwagger, {
